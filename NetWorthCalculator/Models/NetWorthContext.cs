@@ -48,6 +48,11 @@ namespace NetWorthCalculator.Models
                     .IsUnicode(false);
 
                 entity.Property(e => e.Date).HasColumnType("date");
+                
+                entity.Property(e => e.UserId)
+               .IsRequired()
+               .HasMaxLength(10)
+               .IsUnicode(false);
             });
 
             modelBuilder.Entity<NetWorthItem>(entity =>

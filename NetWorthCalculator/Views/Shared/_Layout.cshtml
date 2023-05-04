@@ -1,17 +1,28 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - NetWorthCalculator</title>
+    <title>@ViewData["Title"] - NetWorth Calculator</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/webfonts/all.min.css" />
+
+
 </head>
 <body>
+    @{
+        string controllerName = ViewContext.RouteData.Values["controller"].ToString();
+        string actionName = ViewContext.RouteData.Values["action"].ToString();
+        string redirectUrl = controllerName + "/" + actionName;
+
+    }
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">NetWorthCalculator</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">NetWorth Calculator</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -21,28 +32,77 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                      
+                        @if (User.IsInRole("Admin"))
+                        {
+                         <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Admin
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                                    <a class="dropdown-item" asp-controller="Account" asp-action="Index">Manage Users</a>
+                                     <a class="dropdown-item" asp-controller="NetWorths" asp-action="Index">Manage NetWorth Entries</a>
+                                     <a class="dropdown-item" asp-controller="NetWorthItems" asp-action="Index">Manage NetWorth Items </a>
+                                     <a class="dropdown-item" asp-controller="NetWorthItemResults" asp-action="Index">Manage NetWorth Item Results</a>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                    <ul class="navbar-nav">
+
+                        @if (User.Identity.IsAuthenticated)
+                        { var imgClaim = User.FindFirst("img");
+                            string imgUrl ="";
+                            if (imgClaim != null)
+                                {
+                                     imgUrl = imgClaim.Value;
+                                    // Use the imgUrl to display the user's profile picture
+                              }
+                       
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <img src="@imgUrl" alt="Profile picture" class="mr-2 rounded-circle" style="width: 40px; height: 40px;">@User.Identity.Name
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                                    <a class="dropdown-item" asp-controller="Account" asp-action="MyAccount">Settings</a>
+                                    <a class="dropdown-item" asp-controller="Account" asp-action="Logout">Log out</a>
+                                    
+                                </div>
+                                 
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                
+                               <a class="nav-link text-dark" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@System.Net.WebUtility.UrlDecode(redirectUrl)">Log in</a>
+
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+    
+<!-- Page content -->
+<div class="container my-4">
+  @RenderBody()
+</div>
+<!-- Footer -->
+<footer class="border-top footer text-muted">
+  <div class="container">
+    &copy; 2023 - i_Turtle - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+  </div>
+</footer>
+<!-- Scripts -->
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2023 - NetWorthCalculator - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

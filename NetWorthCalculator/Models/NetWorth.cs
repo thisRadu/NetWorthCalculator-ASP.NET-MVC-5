@@ -11,11 +11,15 @@ namespace NetWorthCalculator.Models
         {
             NetWorthItemResults = new HashSet<NetWorthItemResult>();
         }
-
+        
         public int Id { get; set; }
         public DateTime Date { get; set; }
         public string Advice { get; set; }
+        public int UserId { get; set; }
 
         public virtual ICollection<NetWorthItemResult> NetWorthItemResults { get; set; }
+
+       
+         
     }
 }

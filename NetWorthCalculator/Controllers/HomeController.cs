@@ -74,7 +74,20 @@ namespace NetWorthCalculator.Controllers
                 ViewBag.Next = true;
                 ViewBag.NextItemId = temp.Id;
             }
+            var x = DateTime.Now.ToString("MM/dd/yyyy");
+            var y = _context.NetWorths
+                    .Include(n => n.NetWorthItemResults)
+                    .ThenInclude(nr => nr.ItemNavigation)
+                      .Where(n => n.UserId == userId)
+                      .OrderByDescending(n => n.Date)
+                      .FirstOrDefault().Date.ToString("MM/dd/yyyy");
 
+            ViewBag.CanCreate = _context.NetWorths
+                    .Include(n => n.NetWorthItemResults)
+                    .ThenInclude(nr => nr.ItemNavigation)
+                      .Where(n => n.UserId == userId)
+                      .OrderByDescending(n => n.Date)
+                      .FirstOrDefault().Date.ToString("MM/dd/yyyy") == DateTime.Now.ToString("MM/dd/yyyy") ? false : true;
 
             return View(netWorth);
         }
@@ -130,7 +143,6 @@ namespace NetWorthCalculator.Controllers
         }
 
      
-*/
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

@@ -114,7 +114,7 @@ namespace NetWorthCalculator.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-        
+         
             return View(netWorth);
         }
 
@@ -144,7 +144,7 @@ namespace NetWorthCalculator.Controllers
             var netWorth = await _context.NetWorths.FindAsync(id);
             _context.NetWorths.Remove(netWorth);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("index", "Home");
         }
 
         private bool NetWorthExists(int id)

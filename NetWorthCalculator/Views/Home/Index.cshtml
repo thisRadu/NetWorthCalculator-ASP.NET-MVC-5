@@ -8,8 +8,15 @@
 
 <div class="container">
 <div class="d-flex justify-content-between align-items-center">
-    <a class="btn btn-success" asp-controller="NetWorths" asp-action="Create">Create New</a>
-    <p class="text-right btn-outline-info">@Model.Date.ToString("MM/dd/yyyy")</p>
+        @if (ViewBag.CanCreate == true)
+        {
+            <a class="btn btn-success" asp-controller="Home" asp-action="Create">Create New</a>
+        }
+        else
+        {
+             <a class="btn btn-dark disabled" asp-controller="Home" asp-action="Create">Come back tomorrow</a>
+        }
+        <p class="text-right btn-outline-info">@Model.Date.ToString("MM/dd/yyyy")</p>
 </div>
  
     <hr />
@@ -28,7 +35,7 @@
                         {
                                <div class="form-group">
                                 <label for="asset1">@item.ItemNavigation.Name</label>
-                                <div class="container"> @item.Value </div>
+                                <div class="container btn btn-outline-success disabled"> $@item.Value </div>
                                 @{assetsSum += item.Value;}
                               </div>
                         }
@@ -43,7 +50,7 @@
                         {
                                <div class="form-group">
                                 <label for="asset1">@item.ItemNavigation.Name</label>
-                                <div class="container"> @item.Value </div>
+                                <div class="container btn btn-outline-danger disabled"> $@item.Value </div>
                                 @{liabilitiesSum += item.Value;}
                               </div>
                         }
@@ -71,7 +78,7 @@
   
    
   <div class="d-flex justify-content-between align-items-center">
-    <button class="btn btn-danger m-2 text-right">Delete</button>
+    <a asp-controller="NetWorths" asp-action="Delete" asp-route-id=@Model.Id class="btn btn-danger m-2 text-right">Delete</a>
  
 </div>
             

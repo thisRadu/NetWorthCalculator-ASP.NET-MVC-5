@@ -7,42 +7,8 @@
 @{
     ViewData["Title"] = "Create";
 
-    decimal assetsSum = 0;
-    decimal liabilitiesSum = 0;
-
 }
-@*
-<h1>Create2</h1>
 
-<h4>NetWorth</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create2">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Date" class="control-label"></label>
-                <input asp-for="Date" class="form-control" />
-                <span asp-validation-for="Date" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Advice" class="control-label"></label>
-                <input asp-for="Advice" class="form-control" />
-                <span asp-validation-for="Advice" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="UserId" class="control-label"></label>
-                <input asp-for="UserId" class="form-control" />
-                <span asp-validation-for="UserId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
-*@
 <div class="container">
 
  
@@ -61,7 +27,7 @@
         
                 </div>
                      
-                      <button id="addAssetResultBtn" type="button" class="btn btn-success">[+]Add Assety</button>
+                      <button id="addAssetResultBtn" type="button" class="btn btn-success"><i class="fas fa-plus"></i> Add Assety</button>
                
                 </div>
                 <div class="col-md-6">
@@ -69,39 +35,35 @@
                  
         
            <div id="LiabilitiesContainer">
-          @*  @foreach (var itemResult in Model.NetWorthItemResults)
-                {
-                    <input asp-for="@itemResult.ItemNavigation.Name" type="text" placeholder="Enter description">
-                    <input type="hidden" asp-for="@itemResult.ItemNavigation.Type" value="Asset" >
-                    <input asp-for="@itemResult.Value" type="text" placeholder="Enter value" >
-                }*@
+       
                 </div>
        
-                 <button id="addLiabilityResultBtn" type="button" class="btn btn-success">[+]Add Liability</button>
+                 <button id="addLiabilityResultBtn" type="button" class="btn btn-success"><i class="fas fa-plus"></i> Add Liability</button> 
                 
                 
                 </div>
             </div>
             <hr>
-            <div class="row">
-              
-                <div class="col-md-6">
-                    <p class="subtotal asset" style="font-weight:bold">Total assets: <span>$@assetsSum</span></p>
-                </div>
-                   <div class="col-md-6">
-                    <p class="subtotal asset" style="font-weight:bold">Total assets: <span>$@liabilitiesSum</span></p>
-                </div>
-           
-            </div>
-            @{var netWorth =   assetsSum - liabilitiesSum;
-                var fontColor = netWorth < 0 ?"red":  "green" ; }
-            <h2 class="text-center" style="color:@fontColor; font-weight:bold">Your total net worth: <span class="negative">$@netWorth</span></h2>
+        <div class="row">
+    <div class="col-md-6">
+        <p class="subtotal asset" style="font-weight:bold">Total assets: <span class="asset-total">$0.00</span></p>
+    </div>
+    <div class="col-md-6">
+        <p class="subtotal liability" style="font-weight:bold">Total liabilities: <span class="liability-total">$$0.00</span></p>
+    </div>
+</div>
+
+       <div style="display: flex; justify-content: center; align-items: center; height: 20vh;">
+  <button class="btn btn-outline-dark disabled">
+    <h2 class="text-center font-weight-bold">Your total net worth: <span class="netWorthResult">$0.00</span></h2>
+  </button>
+</div>
         </div>
     </div>
   
    
   <div class="d-flex justify-content-center align-items-center">
-    <input type="submit" value="Save" class="btn btn-primary m-2 text-center">Save</input>
+    <input type="submit" value="Save" class="btn btn-primary m-2 text-center"></input>
     </div>
      </form>
  
@@ -111,12 +73,41 @@
 
 
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
 
 @section Scripts {
       <script>
+
+          $(document).on('input', '.asset, .liability', function () {
+    var assetTotal = 0;
+    var liabilityTotal = 0;
+
+    // Loop through all asset input fields and sum their values
+    $('.asset').each(function () {
+        var value = parseFloat($(this).val());
+        if (!isNaN(value)) {
+            assetTotal += value;
+        }
+    });
+
+    // Loop through all liability input fields and sum their values
+    $('.liability').each(function () {
+        var value = parseFloat($(this).val());
+        if (!isNaN(value)) {
+            liabilityTotal += value;
+        }
+    });
+
+    // Update the subtotal display for assets and liabilities
+    $('.asset-total').text('$' + assetTotal.toFixed(2));
+    $('.liability-total').text('$' + liabilityTotal.toFixed(2));
+
+    // Calculate the net worth and update the display
+    var netWorth = assetTotal - liabilityTotal;
+    var fontColor = netWorth < 0 ? 'red' : 'green';
+    $('.netWorthResult').text('$' + netWorth.toFixed(2)).css('color', fontColor);
+});
+
+
         $(document).ready(function () {
             var LiabilitiesContainer = $("#LiabilitiesContainer");
             var AssetsContainer = $("#AssetsContainer");
@@ -133,12 +124,12 @@
                     </div>
                     <div class="form-group">
                        
-                        <input name="NetWorthItemResults[${netWorthItemsCount}].Value" class="form-control" placeholder="Enter Value" />
-                        <span class="text-danger" data-valmsg-for="NetWorthItem
+                        <input name="NetWorthItemResults[${netWorthItemsCount}].Value" class="liability form-control" placeholder="Enter Value" />
+                        <span class="text-danger"  data-valmsg-for="NetWorthItem
                                             Results[${netWorthItemsCount}].Value"></span>
                     </div>
                     <br>
-                    <input name="NetWorthItemResults[${netWorthItemsCount}].Item" type="hidden" value="0" />
+                    <input  name="NetWorthItemResults[${netWorthItemsCount}].Item" type="hidden" value="0" />
                      <input name="NetWorthItemResults[${netWorthItemsCount}].ItemNavigation.Type" type="hidden" value="Liability" />
                 `;
                 LiabilitiesContainer.append(template);
@@ -153,12 +144,12 @@
                     </div>
                     <div class="form-group">
                        
-                        <input name="NetWorthItemResults[${netWorthItemsCount}].Value" class="form-control" placeholder="Enter Value" />
+                        <input name="NetWorthItemResults[${netWorthItemsCount}].Value" class="asset form-control" placeholder="Enter Value" />
                         <span class="text-danger" data-valmsg-for="NetWorthItem
                                             Results[${netWorthItemsCount}].Value"></span>
                     </div>
                     <br>
-                    <input name="NetWorthItemResults[${netWorthItemsCount}].Item" type="hidden" value="0" />
+                    <input  name="NetWorthItemResults[${netWorthItemsCount}].Item" type="hidden" value="0" />
                      <input name="NetWorthItemResults[${netWorthItemsCount}].ItemNavigation.Type" type="hidden" value="Asset" />
                 `;
                 AssetsContainer.append(template);

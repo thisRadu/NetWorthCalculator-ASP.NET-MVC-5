@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -50,8 +51,8 @@ namespace NetWorthCalculator.Controllers
                 // Authenticate user here
                 var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == model.UserName);
 
-              
-                if (user != null && user.Password == model.Password)
+
+                if (user != null && BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
                 {
 
                     // Create claims for authenticated user
@@ -85,7 +86,7 @@ namespace NetWorthCalculator.Controllers
 
 
             }
-            return BadRequest();
+            return View(model);
         }
 
         public async Task<IActionResult> Register(string returnUrl)
@@ -121,24 +122,21 @@ namespace NetWorthCalculator.Controllers
                 Role = "user",
                 Active = true,
                 Username = model.UserName,
-                Password = model.Password,
+                Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
                 Email = model.Email,
                 PictureUrl = "https://wallpapers-clan.com/wp-content/uploads/2022/07/funny-cat-1.jpg"
 
             };
-            /*
-                        var passwordHasher = new PasswordHasher<User>();
-                        user.Password = passwordHasher.HashPassword(user, model.Password);*/
-
+        
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
             return RedirectToAction("Login", "Account");
         }
-
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         public async Task<IActionResult> MyAccount()
         {
-            int id = Convert.ToInt32((HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value));
+            int id = Convert.ToInt32(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
             if (id == null)
             {
                 return NotFound();
@@ -152,9 +150,7 @@ namespace NetWorthCalculator.Controllers
             return View(user);
         }
 
-        // POST: Account/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> MyAccount(int id, [Bind("UserName,Password,Email,Phone,PictureUrl")] User user)
@@ -190,7 +186,7 @@ namespace NetWorthCalculator.Controllers
             return View(user);
         }
 
-        // GET: Account
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles="Admin")]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Users.ToListAsync());
@@ -214,15 +210,13 @@ namespace NetWorthCalculator.Controllers
             return View(user);
         }
 
-        // GET: Account/Create
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Account/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Username,Password,Email,Role,PictureUrl,Active")] User user)
@@ -236,7 +230,7 @@ namespace NetWorthCalculator.Controllers
             return View(user);
         }
 
-        // GET: Account/Edit/5
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -252,9 +246,7 @@ namespace NetWorthCalculator.Controllers
             return View(user);
         }
 
-        // POST: Account/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Username,Password,Email,Role,PictureUrl,Active")] User user)
@@ -287,7 +279,7 @@ namespace NetWorthCalculator.Controllers
             return View(user);
         }
 
-        // GET: Account/Delete/5
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -305,7 +297,7 @@ namespace NetWorthCalculator.Controllers
             return View(user);
         }
 
-        // POST: Account/Delete/5
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
